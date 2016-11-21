@@ -1,0 +1,12 @@
+{
+    "generic": [
+        {
+            "ID#": "194",
+            "metric": "temperature_celsius"
+        },
+        {
+            "ID#": "5",
+            "metric": "reallocated_sectors"
+        }
+    ]
+}
