@@ -8,6 +8,7 @@ import socket
 import sys
 
 import systemd.daemon
+import systemd.journal
 
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,11 @@ MODEL = re.compile(
     re.MULTILINE,
 )
 
+MODEL_FAMILY = re.compile(
+    r"^Model Family:\s*(\S.*)$",
+    re.MULTILINE,
+)
+
 ATTR_LINE = re.compile(
     r"""^\s*
     (?P<id>\d+)\s+
@@ -45,7 +51,12 @@ def read_drive_info(device):
         data = subprocess.check_output(
             ["smartctl", "-iA", device],
         ).decode()
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as exc:
+        logger.error(
+            "failed to read SMART data for %s (%s)",
+            device,
+            exc,
+        )
         return {
             "error": 1,
         }
@@ -53,7 +64,18 @@ def read_drive_info(device):
     info, smart_data = data.split("START OF READ SMART DATA", 1)
 
     serial_no = SERIAL_NUMBER.search(info)
+
+    family = MODEL_FAMILY.search(info)
+    if family is None:
+        family = "unknown"
+    else:
+        family = family.group(1)
+
     model = MODEL.search(info)
+    if model is None:
+        model = "unknown"
+    else:
+        model = model.group(1)
 
     attrs = []
 
@@ -73,7 +95,8 @@ def read_drive_info(device):
 
     return {
         "serial": serial_no.group(1),
-        "model": model.group(1),
+        "model": model,
+        "family": family,
         "attrs": attrs,
         "error": 0,
     }
@@ -138,13 +161,7 @@ def main():
 
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level={
-            0: logging.ERROR,
-            1: logging.WARNING,
-            2: logging.INFO,
-        }.get(args.verbosity, logging.DEBUG)
-    )
+    logging_kwargs = {}
 
     sd_fds = systemd.daemon.listen_fds()
     if len(sd_fds) == 0 and args.socket_path is None:
@@ -164,6 +181,9 @@ def main():
         )
         sys.exit(1)
     elif len(sd_fds) == 1:
+        logging_kwargs["handlers"] = [
+            systemd.journal.JournalHandler(),
+        ]
         sock = socket.fromfd(
             sd_fds[0],
             socket.AF_UNIX,
@@ -186,6 +206,15 @@ def main():
 
         if args.timeout is not None:
             sock.settimeout(args.timeout)
+
+    logging.basicConfig(
+        level={
+            0: logging.ERROR,
+            1: logging.WARNING,
+            2: logging.INFO,
+        }.get(args.verbosity, logging.DEBUG),
+        **logging_kwargs
+    )
 
     while True:
         try:

@@ -11,6 +11,7 @@ setup(
     entry_points={
         "console_scripts": [
             "prometheus_smart_exporter=prometheus_smart_exporter:main",
+            "smart_exporter_helper=smart_exporter_helper:main",
         ]
     },
     install_requires=[

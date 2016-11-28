@@ -1,16 +1,17 @@
 import ast
-import functools
 import logging
 import http.server
 import pathlib
-import re
 import socket
 import struct
 import sys
 
 from prometheus_client import REGISTRY
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.core import (GaugeMetricFamily,
+                                    CounterMetricFamily)
 from prometheus_client.exposition import MetricsHandler
+
+from . import attrmeta, devicedb
 
 
 DEFAULT_DEVICE_DB = "/etc/prometheus_smart_exporter/devices.json"
@@ -38,6 +39,9 @@ class SMARTCollector(object):
         self.attrmap = attrmap
         self.labels = [
             "port",
+            "model",
+            "family",
+            "serial",
         ]
 
     def _get_connected_socket(self):
@@ -93,7 +97,7 @@ class SMARTCollector(object):
         error_metrics = GaugeMetricFamily(
             "smart_access_error",
             "flag indicating that there is a problem accessing the device",
-            labels=self.labels,
+            labels=["port"],
         )
 
         attr_metrics = {}
@@ -102,7 +106,7 @@ class SMARTCollector(object):
             nonlocal attr_metrics
 
             try:
-                metric_name = self.attrmap.get_metric_for_attribute(
+                metric_name, type_ = self.attrmap.get_metric_for_attribute(
                     device, id_, name
                 )
             except KeyError:
@@ -111,11 +115,17 @@ class SMARTCollector(object):
             try:
                 return attr_metrics[metric_name]
             except KeyError:
-                metric = GaugeMetricFamily(
+                class_ = {
+                    attrmeta.MetricType.GAUGE: GaugeMetricFamily,
+                    attrmeta.MetricType.COUNTER: CounterMetricFamily,
+                }[type_]
+
+                metric = class_(
                     "smart_{}".format(metric_name),
                     "S.M.A.R.T. metric based on attribute {}".format(name),
                     labels=self.labels,
                 )
+
                 attr_metrics[metric_name] = metric
                 return metric
 
@@ -135,6 +145,8 @@ class SMARTCollector(object):
             )
 
             device = devinfo["model"]
+            family = devinfo["family"]
+            serial = devinfo["serial"]
 
             self.logger.debug("device %r", device)
 
@@ -174,6 +186,8 @@ class SMARTCollector(object):
                     continue
 
                 metric = get_attr_metric(device, id_, name)
+                if metric is None:
+                    continue
 
                 self.logger.debug(
                     "registering %s of #%d on metric %s",
@@ -183,11 +197,14 @@ class SMARTCollector(object):
                 )
 
                 metric.add_metric(
-                    [port],
+                    [port, device, family, serial],
                     float(attrinfo[type_])
                 )
 
-        return [global_error_metric, error_metrics] + list(attr_metrics.values())
+        return [
+            global_error_metric,
+            error_metrics
+        ] + list(attr_metrics.values())
 
 
 class HTTP6Server(http.server.HTTPServer):
@@ -202,201 +219,6 @@ def socket_path(s):
         )
 
     return p
-
-
-class DeviceDB:
-    def __init__(self, logger):
-        super().__init__()
-        self._logger = logger
-        self._devices = {}
-
-    def load(self, f):
-        data = ast.literal_eval(f.read())
-
-        devices = data["Devices"]
-
-        for device_info in devices.values():
-            logger.debug("interpreting %r", device_info)
-
-            ids = {
-                int(id_): {
-                    "RAW_VALUE": "Raw",
-                    "VALUE": "Value",
-                }[type_]
-                for id_, type_ in device_info["ID#"].items()
-            }
-            threshs = {
-                int(id_): (warn, crit)
-                for id_, (warn, crit) in device_info["Threshs"].items()
-            }
-            perfs = set(map(int, device_info["Perfs"]))
-            logger.debug("found ID#=%r", ids)
-            logger.debug("found Threshs=%r", threshs)
-            logger.debug("found Perfs=%r", perfs)
-
-            for device in device_info["Device"]:
-                logger.debug("updating %r with said info", device)
-                existing_ids, existing_threshs, existing_perfs = \
-                    self._devices.setdefault(device, ({}, {}, set()))
-                existing_ids.update(ids)
-                existing_threshs.update(threshs)
-                existing_perfs.update(perfs)
-
-    def stats(self):
-        return "{} devices".format(len(self._devices))
-
-    def get_info_for_attr(self, device, id_):
-        ids, threshs, perfs = self._devices[device]
-        type_ = ids[id_]
-        threshs = threshs.get(id_)
-        generate_perf = id_ in perfs
-
-        return type_, threshs, generate_perf
-
-
-class AttributeMapping:
-    TOPLEVEL_KNOWN_KEYS = [
-        "generic",
-        "per-device",
-    ]
-
-    PER_DEVICE_RULES_KNOWN_KEYS = [
-        "Devices",
-        "rules",
-    ]
-
-    PER_DEVICE_RULES_REQUIRED_KEYS = \
-        PER_DEVICE_RULES_KNOWN_KEYS
-
-    RULE_KNOWN_KEYS = [
-        "ID#", "Name",
-        "metric",
-    ]
-    RULE_REQUIRED_KEYS = [
-        "ID#", "metric",
-    ]
-
-    def __init__(self, logger):
-        super().__init__()
-        self._logger = logger
-        self._generic = {}
-        self._per_device = {}
-
-    def _check_keys(self, dict_, known_keys, required_keys, at):
-        existing = set(dict_.keys())
-        unknown = existing - set(known_keys)
-        missing = set(required_keys) - existing
-
-        for unknown_key in unknown:
-            self._logger.warning(
-                "unknown configuration key %r at %s",
-                unknown_key, at,
-            )
-
-        if missing:
-            raise ValueError("missing configuration keys at {}: {}".format(
-                at,
-                ", ".join(map(repr, missing))
-            ))
-
-    def _load_rules(self, rules):
-        for rule in rules:
-            self._logger.debug("interpreting rule %r", rule)
-            self._check_keys(rule,
-                             self.RULE_KNOWN_KEYS,
-                             self.RULE_REQUIRED_KEYS,
-                             "rule")
-
-            idno = int(rule["ID#"])
-            name_regex_src = rule.get("Name", None)
-            if not name_regex_src:
-                name_regex = None
-            else:
-                name_regex = re.compile(name_regex_src)
-            metric = rule["metric"]
-
-            yield (idno, name_regex, metric)
-
-    def _extend_rules(self, rules, new_rules):
-        for idno, name_regex, metric in new_rules:
-            rules.setdefault(idno, []).append((name_regex, metric))
-
-    def load(self, f):
-        data = ast.literal_eval(f.read())
-
-        self._check_keys(
-            data,
-            self.TOPLEVEL_KNOWN_KEYS,
-            [],
-            "toplevel",
-        )
-
-        self._logger.debug("loading generic rules")
-        self._extend_rules(
-            self._generic,
-            self._load_rules(
-                data.get("generic", []),
-            )
-        )
-
-        self._logger.debug("loading per-device rules")
-        for per_device_rule in data.get("per-device", []):
-            self._logger.debug("interpreting per-device rules %r",
-                               per_device_rule)
-            self._check_keys(
-                per_device_rule,
-                self.PER_DEVICE_RULES_KNOWN_KEYS,
-                self.PER_DEVICE_RULES_REQUIRED_KEYS,
-                "per-device rule",
-            )
-
-            rules = list(
-                self._load_rules(
-                    per_device_rule["rules"],
-                )
-            )
-
-            for device in per_device_rule["Devices"]:
-                self._extend_rules(
-                    self._per_device.setdefault(device, {}),
-                    rules
-                )
-
-        self._logger.debug("finished")
-
-    def stats(self):
-        return "{} generic rules, {} per device rules for {} devices".format(
-            len(self._generic),
-            sum(len(rules) for rules in self._per_device.values()),
-            len(self._per_device),
-        )
-
-    def _get_metric_for_attribute_from_rules(self, rules, id_, name):
-        id_rules = rules.get(int(id_), [])
-        for name_regex, metric in id_rules:
-            if name_regex is None:
-                return metric
-            if name_regex.match(name):
-                return metric
-        raise KeyError((id_, name))
-
-    @functools.lru_cache()
-    def get_metric_for_attribute(self, device, id_, name):
-        device_rules = self._per_device.get(device, {})
-        try:
-            return self._get_metric_for_attribute_from_rules(
-                device_rules, id_, name
-            )
-        except KeyError:
-            return self._get_metric_for_attribute_from_rules(
-                self._generic, id_, name
-            )
-
-
-def process_attrmap(f, logger):
-    mapping = AttributeMapping(logger)
-    mapping.load(f)
-    return mapping
 
 
 def main():
@@ -431,6 +253,13 @@ def main():
     )
 
     parser.add_argument(
+        "--journal",
+        action="store_true",
+        default=False,
+        help="Log to systemd journal",
+    )
+
+    parser.add_argument(
         "-p", "--listen-port",
         default=9134,
         metavar="PORT",
@@ -453,12 +282,18 @@ def main():
 
     args = parser.parse_args()
 
+    logging_kwargs = {}
+    if args.journal:
+        import systemd.journal
+        logging_kwargs["handlers"] = [systemd.journal.JournalHandler()]
+
     logging.basicConfig(
         level={
             0: logging.ERROR,
             1: logging.WARNING,
             2: logging.INFO,
-        }.get(args.verbosity, logging.DEBUG)
+        }.get(args.verbosity, logging.DEBUG),
+        **logging_kwargs
     )
 
     if args.device_db is None:
@@ -475,7 +310,7 @@ def main():
             sys.exit(2)
 
     with args.device_db as f:
-        device_db = DeviceDB(logging.getLogger("devdb"))
+        device_db = devicedb.DeviceDB(logging.getLogger("devdb"))
         try:
             device_db.load(f)
         except SyntaxError as exc:
@@ -504,8 +339,9 @@ def main():
             sys.exit(2)
 
     with args.attr_mapping as f:
+        attr_mapping = attrmeta.AttributeMapping(logging.getLogger("attrmap"))
         try:
-            attr_mapping = process_attrmap(f, logging.getLogger("attrmap"))
+            attr_mapping.load(f)
         except (SyntaxError, ValueError) as exc:
             logger.error(
                 "failed to load attribute mapping: %s", exc,

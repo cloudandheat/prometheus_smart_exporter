@@ -1,12 +1,65 @@
 {
     "generic": [
         {
-            "ID#": "194",
-            "metric": "temperature_celsius"
+            "id": 5,
+            "name": "reallocated_sectors",
+            "type": "counter"
         },
         {
-            "ID#": "5",
-            "metric": "reallocated_sectors"
+            "id": 10,
+            "name": "spin_retries_total",
+            "type": "counter"
+        },
+        {
+            "id": 183,
+            "match": "^.+Bad.+$",
+            "name": "runtime_bad_blocks_total",
+            "type": "counter"
+        },
+        {
+            "id": 184,
+            "name": "end_to_end_errors_total",
+            "type": "counter"
+        },
+        {
+            "id": 187,
+            "name": "uncorrectable_errors_total",
+            "type": "counter"
+        },
+        {
+            "id": 188,
+            "name": "command_timeouts_total",
+            "type": "counter"
+        },
+        {
+            "id": 194,
+            "name": "temperature_celsius",
+            "type": "gauge"
+        },
+        {
+            "id": 196,
+            "name": "reallocation_events_total",
+            "type": "counter"
+        },
+        {
+            "id": 197,
+            "name": "pending_sectors",
+            "type": "gauge"
+        },
+        {
+            "id": 198,
+            "name": "uncorrectable_sectors",
+            "type": "gauge"
+        },
+        {
+            "id": 201,
+            "name": "soft_read_error_rate",
+            "type": "gauge"
+        },
+        {
+            "id": 230,
+            "name": "drive_life_protection_status",
+            "type": "gauge"
         }
     ]
 }
