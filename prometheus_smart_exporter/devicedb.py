@@ -24,7 +24,7 @@ class DeviceDB:
             }
             threshs = {
                 int(id_): (warn, crit)
-                for id_, (warn, crit) in device_info["Threshs"].items()
+                for id_, (warn, crit, *_) in device_info["Threshs"].items()
             }
             perfs = set(map(int, device_info["Perfs"]))
             self._logger.debug("found ID#=%r", ids)
