@@ -1,0 +1,17 @@
+[Unit]
+Description=UNIX Socket for prometheus_smart_helper.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Socket]
+ListenStream=/var/run/prometheus_smart_helper/ipc
+Accept=true
+SocketUser=prometheus
+SocketGroup=prometheus
+SocketMode=0600
+Accept=false
+RuntimeDirectory=prometheus_smart_helper
+User=prometheus
+Group=prometheus
+RuntimeDirectoryMode=0600

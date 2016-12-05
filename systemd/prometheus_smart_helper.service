@@ -1,0 +1,15 @@
+[Unit]
+Description=Helper service to provide S.M.A.R.T. info to prometheus_smart_exporter
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/smart_exporter_helper -vv
+PrivateTmp=true
+PrivateDevices=no
+ProtectHome=yes
+PrivateNetwork=yes
