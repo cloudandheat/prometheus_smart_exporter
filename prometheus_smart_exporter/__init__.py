@@ -100,6 +100,13 @@ class SMARTCollector(object):
             labels=["port"],
         )
 
+        warning_metrics = GaugeMetricFamily(
+            "smart_metric_error",
+            "flag indicating that there is a problem converting metrics "
+            "from the device",
+            labels=["port"],
+        )
+
         attr_metrics = {}
 
         def get_attr_metric(device, id_, name):
@@ -138,6 +145,8 @@ class SMARTCollector(object):
                     1.
                 )
                 continue
+
+            has_warnings = False
 
             error_metrics.add_metric(
                 [port],
@@ -186,6 +195,7 @@ class SMARTCollector(object):
                             device,
                             exc,
                         )
+                        has_warnings = True
                     continue
 
                 metric = get_attr_metric(device, id_, name)
@@ -204,9 +214,16 @@ class SMARTCollector(object):
                     float(attrinfo[type_])
                 )
 
+            if has_warnings:
+                warning_metrics.add_metric(
+                    [port],
+                    int(has_warnings)
+                )
+
         return [
             global_error_metric,
-            error_metrics
+            error_metrics,
+            warning_metrics,
         ] + list(attr_metrics.values())
 
 
