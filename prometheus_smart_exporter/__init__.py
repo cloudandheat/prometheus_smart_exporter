@@ -158,7 +158,7 @@ class SMARTCollector(object):
 
                 try:
                     type_, _, _ = self.devicedb.get_info_for_attr(device, id_)
-                except KeyError:
+                except KeyError as exc:
                     try:
                         # check if attribute is explicitly configured
                         # in that case, we want to warn
@@ -169,19 +169,22 @@ class SMARTCollector(object):
                         # not configured -> no warning
                         self.logger.debug(
                             "omitting unconfigured attribute which is missing"
-                            " in device db: #%d (%s) on device %r",
+                            " in device db: #%d (%s) on device %r"
+                            " (lookup failed for %s)",
                             id_,
                             name,
                             device,
+                            exc,
                         )
                     else:
                         self.logger.warning(
                             "explicitly configured attribute #%d (%s) on"
                             " device %r is missing in devicedb -- cannot"
-                            " generate metric!",
+                            " generate metric! (lookup failed for %s)",
                             id_,
                             name,
                             device,
+                            exc,
                         )
                     continue
 
