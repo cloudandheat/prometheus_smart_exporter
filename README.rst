@@ -48,7 +48,13 @@ The helper is less than 300 lines of nearly dependency-free (the exception are t
 Installation
 ============
 
-TODO.
+Install via PyPI:
+
+.. code-block:: sh
+
+   pip3 install prometheus_smart_exporter
+
+Installation via PyPI does *not* install any system-wide configuration. You need to do that yourself.
 
 
 Configuration
