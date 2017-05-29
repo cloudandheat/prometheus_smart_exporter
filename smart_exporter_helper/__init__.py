@@ -148,8 +148,7 @@ def main():
         default=None,
         type=int,
         help="Time in seconds to wait between connections. Defaults to "
-        " infinity if --socket-path is used and 2 if started via socket"
-        " activation."
+        " infinity."
     )
 
     parser.add_argument(
@@ -190,7 +189,9 @@ def main():
             socket.SOCK_STREAM,
             0,
         )
-        sock.settimeout(args.timeout if args.timeout is not None else 2)
+
+        if args.timeout is not None:
+            sock.settimeout(args.timeout)
     else:
         p = pathlib.Path(args.socket_path).absolute()
         if p.is_socket():
