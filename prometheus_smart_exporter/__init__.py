@@ -281,10 +281,10 @@ def main():
 
     parser.add_argument(
         "-p", "--listen-port",
-        default=9134,
+        default=9257,
         metavar="PORT",
         type=int,
-        help="Port number to bind to (default: 9134)",
+        help="Port number to bind to (default: 9257)",
     )
 
     parser.add_argument(

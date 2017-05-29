@@ -7,7 +7,7 @@ WantedBy=multi-user.target
 
 [Service]
 Type=simple
-Environment=SMART_LISTEN_ADDR=127.0.0.1 SMART_LISTEN_PORT=9134 SMART_DEVICE_DB=/etc/prometheus_smart_exporter/devices.json
+Environment=SMART_LISTEN_ADDR=127.0.0.1 SMART_LISTEN_PORT=9257 SMART_DEVICE_DB=/etc/prometheus_smart_exporter/devices.json
 ExecStart=/usr/bin/prometheus_smart_exporter --listen-address ${SMART_LISTEN_ADDR} --listen-port ${SMART_LISTEN_PORT} --device-db ${SMART_DEVICE_DB} --journal -vv /var/run/prometheus_smart_helper/ipc
 User=prometheus
 Group=prometheus

@@ -159,7 +159,7 @@ The HTTP exporter is configured using the aforementioned JSON files and command 
      -v                    Increase verbosity (up to -vvv)
      --journal             Log to systemd journal
      -p PORT, --listen-port PORT
-                           Port number to bind to (default: 9134)
+                           Port number to bind to (default: 9257)
      -a ADDR, --listen-address ADDR
                            Address to bind to (default: 127.0.0.1)
 
