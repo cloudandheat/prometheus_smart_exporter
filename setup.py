@@ -16,5 +16,6 @@ setup(
     },
     install_requires=[
         "prometheus_client>=0.0.14",
+        "systemd_python"
     ]
 )
