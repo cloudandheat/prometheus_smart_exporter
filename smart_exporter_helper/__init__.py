@@ -127,8 +127,9 @@ def iter_drives():
     for p in base.iterdir():
         basename = p.parts[-1]
         if DEVICE_PATH_PATTERN.match(basename):
-            for blockdev in (p / "block").iterdir():
-                yield basename, blockdev.parts[-1]
+            if (p / "block").is_dir():
+                for blockdev in (p / "block").iterdir():
+                    yield basename, blockdev.parts[-1]
 
 
 def handle_client(sock):
