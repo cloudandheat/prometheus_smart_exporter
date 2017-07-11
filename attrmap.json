@@ -32,6 +32,11 @@
             "type": "counter"
         },
         {
+            "id": 192,
+            "name": "case_temperature_celsius",
+            "type": "gauge"
+        },
+        {
             "id": 194,
             "name": "temperature_celsius",
             "type": "gauge"
@@ -60,6 +65,23 @@
             "id": 230,
             "name": "drive_life_protection_status",
             "type": "gauge"
+        },
+        {
+            "id": 233,
+            "name": "wearout_percent",
+            "type": "gauge"
+        },
+        {
+            "id": 241,
+            "match": "Total_LBAs_Written",
+            "name": "written_lbas_total",
+            "type": "counter",
+        },
+        {
+            "id": 242,
+            "match": "Total_LBAs_Read",
+            "name": "read_lbas_total",
+            "type": "counter",
         }
     ]
 }
