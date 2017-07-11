@@ -32,7 +32,7 @@
             "type": "counter"
         },
         {
-            "id": 192,
+            "id": 190,
             "name": "case_temperature_celsius",
             "type": "gauge"
         },
