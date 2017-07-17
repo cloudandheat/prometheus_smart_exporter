@@ -29,7 +29,7 @@ with open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
 
 setup(
     name="prometheus_smart_exporter",
-    version="0.2.1",
+    version="0.2.2",
     description="S.M.A.R.T. exporter for Prometheus",
     long_description=long_description,
     url="https://github.com/cloudandheat/prometheus_smart_exporter",
