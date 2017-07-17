@@ -24,7 +24,7 @@ setup(
     name="ch-prometheus-smart-exporter",
     version="0.1",
     description="S.M.A.R.T. exporter for Prometheus",
-    url="https://gitlab.cloudandheat.com/jonas.wielicki/prometheus_smart_exporter",
+    url="https://github.com/cloudandheat/prometheus_smart_exporter",
     author="Jonas Wielicki",
     author_email="jonas.wielicki@cloudandheat.com",
     packages=find_packages(),
