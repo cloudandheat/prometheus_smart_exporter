@@ -34,8 +34,8 @@ from prometheus_client.exposition import MetricsHandler
 from . import attrmeta, devicedb
 
 
-DEFAULT_DEVICE_DB = "/etc/prometheus_smart_exporter/devices.json"
-DEFAULT_ATTR_MAPPING = "/etc/prometheus_smart_exporter/attrmap.json"
+DEFAULT_DEVICE_DB = pathlib.Path("/etc/prometheus_smart_exporter/devices.json")
+DEFAULT_ATTR_MAPPING = pathlib.Path(__file__).parent / "data" / "attrmap.json"
 
 Header = struct.Struct("=BQ")
 
@@ -340,7 +340,7 @@ def main():
         logger.debug("no --device-db specified, using default %r",
                      DEFAULT_DEVICE_DB)
         try:
-            args.device_db = open(DEFAULT_DEVICE_DB, "r")
+            args.device_db = DEFAULT_DEVICE_DB.open("r")
         except OSError as exc:
             logger.error("failed to open device database: %s", exc)
             logger.info(
@@ -369,7 +369,7 @@ def main():
         logger.debug("no --attr-mapping specified, using default %r",
                      DEFAULT_ATTR_MAPPING)
         try:
-            args.attr_mapping = open(DEFAULT_ATTR_MAPPING, "r")
+            args.attr_mapping = DEFAULT_ATTR_MAPPING.open("r")
         except OSError as exc:
             logger.error("failed to open attribute mapping: %s", exc)
             logger.info(

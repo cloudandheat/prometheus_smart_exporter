@@ -37,5 +37,10 @@ setup(
     install_requires=[
         "prometheus_client>=0.0.14",
         "systemd_python"
-    ]
+    ],
+    package_data={
+        "prometheus_smart_exporter": [
+            "data/attrmap.json",
+        ]
+    }
 )
