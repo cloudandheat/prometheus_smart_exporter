@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="prometheus_smart_exporter",
-    version="0.1",
+    version="0.2.0",
     description="S.M.A.R.T. exporter for Prometheus",
     url="https://github.com/cloudandheat/prometheus_smart_exporter",
     author="Jonas Wielicki",
