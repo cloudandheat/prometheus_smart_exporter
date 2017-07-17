@@ -17,9 +17,9 @@ We want to avoid having a service running as root exposed to the network. This i
 1. a helper which runs as root (``smart_exporter_helper``)
 2. the HTTP server which serves the data (``prometheus_smart_exporter``)
 
-The helper runs as systemd service listening on UNIX socket managed by systemd or the helper itself. When a client connects to the socket, the helper reads out S.M.A.R.T. information and sends it to the client as serialised Python dict wrapped in a simple binary format.
+The helper runs as a service listening on UNIX socket (ideally managed by systemd, but can also be managed by the helper itself). When a client connects to the socket, the helper reads S.M.A.R.T. metrics and sends them to the client as serialised Python dict wrapped in a simple binary format.
 
-The exporter listens on HTTP and when asked to export data, it connects to the UNIX socket and receives the current S.M.A.R.T. information. All interpretation, filtering and Prometheus-specific formatting of the data is done in the exporter and as unprivilegued user.
+The exporter listens on HTTP and when asked to export data, it connects to the UNIX socket and receives the current S.M.A.R.T. metrics. All interpretation, filtering and Prometheus-specific formatting of the data is done in the exporter and as unprivilegued user.
 
 Socket Protocol
 ---------------
@@ -64,6 +64,8 @@ Services and Sockets
 --------------------
 
 It is recommended to use systemd to manage the UNIX socket for the helper. It allows you fine control over the user, group and mode of the socket, thus allowing to expose the socket only to the exporter process. In addition, at allows for seamless restarts of the helper service.
+
+Example service files for use with systemd are included in the `git repository`_.
 
 .. _device-db:
 
@@ -110,8 +112,9 @@ Each ``rule`` looks like this:
 ``"name"``
   the name of the Prometheus metric to use. All metric names are automatically prefixed with ``smart_``; the prefix must not be included in the ``"name"`` attribute.
 ``"type"``
-  the type of the Prometheus metric to use.
+  the type of the Prometheus metric to use (generally ``"gauge"`` or ``"counter"``).
 
+A default attribute mapping is included in the package itself. Pull requests for additional rules are welcome.
 
 Helper
 ------
@@ -137,7 +140,7 @@ The helper is configured using command line arguments only.
   specifies the time for which the service stays alive after finishing the last request. This can be used to help conserve memory at the cost of measurement latency and CPU/disk-IO.
 
 ``--socket-path``
-  If systemd socket activation is not used, this argument must be given to specify at which location the socket shall be created. If a socket is already present at that location, it is unlinked at startup and replaced with a fresh socket.
+  If systemd socket activation is not used, this argument must be given to specify at which location the socket shall be created. If a socket is already present at that location, it is unlinked at startup and replaced with a fresh socket. In general, it is recommended to use systemd with socket activation instead.
 
 HTTP Exporter
 -------------
@@ -160,8 +163,7 @@ The HTTP exporter is configured using the aforementioned JSON files and command 
                            Device database in JSON format (default:
                            /usr/share/ch-monitoring-smart-data/devices.json)
      --attr-mapping ATTR_MAPPING
-                           Attribute mapping in JSON format (default:
-                           /etc/prometheus_smart_exporter/attrmap.json)
+                           Attribute mapping in JSON format (default: <...>)
      -v                    Increase verbosity (up to -vvv)
      --journal             Log to systemd journal
      -p PORT, --listen-port PORT
@@ -173,7 +175,7 @@ The HTTP exporter is configured using the aforementioned JSON files and command 
   path to the `S.M.A.R.T. device database <device-db>`_
 
 ``--attr-mapping``
-  path to the `attribute map <attr-mapping>`_
+  path to the `attribute map <attr-mapping>`_. By default, the attribute map delivered with the package is used.
 
 ``--journal``
   enable logging to the systemd journal. By default, logs go to standard output.
@@ -189,3 +191,4 @@ The HTTP exporter is configured using the aforementioned JSON files and command 
 
 
 .. _check_smart_attributes: https://github.com/thomas-krenn/check_smart_attributes
+.. _git repository: https://github.com/cloudandheat/prometheus_smart_exporter
