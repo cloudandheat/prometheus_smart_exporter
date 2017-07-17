@@ -18,12 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+import os.path
+
 from setuptools import setup, find_packages
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+with open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
+    long_description = f.read()
 
 setup(
     name="prometheus_smart_exporter",
     version="0.2.1",
     description="S.M.A.R.T. exporter for Prometheus",
+    long_description=long_description,
     url="https://github.com/cloudandheat/prometheus_smart_exporter",
     author="Jonas Wielicki",
     author_email="jonas.wielicki@cloudandheat.com",
