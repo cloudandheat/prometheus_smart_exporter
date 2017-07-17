@@ -42,5 +42,15 @@ setup(
         "prometheus_smart_exporter": [
             "data/attrmap.json",
         ]
-    }
+    },
+    keywords="prometheus smart monitoring hdd ssd",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: System Administrators",
+        "Operating System :: Unix",
+        "Operating System :: POSIX :: Linux",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Programming Language :: Python :: 3",
+        "Topic :: System :: Monitoring",
+    ]
 )
