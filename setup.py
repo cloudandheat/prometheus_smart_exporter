@@ -21,7 +21,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="ch-prometheus-smart-exporter",
+    name="prometheus_smart_exporter",
     version="0.1",
     description="S.M.A.R.T. exporter for Prometheus",
     url="https://github.com/cloudandheat/prometheus_smart_exporter",
