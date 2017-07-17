@@ -172,10 +172,10 @@ The HTTP exporter is configured using the aforementioned JSON files and command 
                            Address to bind to (default: 127.0.0.1)
 
 ``--device-db``
-  path to the `S.M.A.R.T. device database <device-db>`_
+  path to the S.M.A.R.T. device database (see above)
 
 ``--attr-mapping``
-  path to the `attribute map <attr-mapping>`_. By default, the attribute map delivered with the package is used.
+  path to the attribute map attr-mapping (see above). By default, the attribute map delivered with the package is used.
 
 ``--journal``
   enable logging to the systemd journal. By default, logs go to standard output.
