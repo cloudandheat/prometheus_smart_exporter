@@ -1,5 +1,6 @@
 [Unit]
 Description=Helper service to provide S.M.A.R.T. info to prometheus_smart_exporter
+Requires=prometheus_smart_helper.socket
 
 [Install]
 WantedBy=multi-user.target
