@@ -109,7 +109,7 @@ def read_drive_info(device):
                 "Value": int(fields[3]),
                 "Worst": int(fields[4]),
                 "Thresh": int(fields[5]),
-                "Raw": int(fields[9]),
+                "Raw": int(fields[9]) if fields[9].isdigit() else None,
             }
         )
 
