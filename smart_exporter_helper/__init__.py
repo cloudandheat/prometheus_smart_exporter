@@ -69,7 +69,7 @@ ATTR_LINE = re.compile(
 def read_drive_info(device):
     try:
         data = subprocess.check_output(
-            ["smartctl", "-iA", device],
+            ["smartctl", "--nocheck=standby", "-iA", device],
         ).decode()
     except subprocess.CalledProcessError as exc:
         logger.error(
