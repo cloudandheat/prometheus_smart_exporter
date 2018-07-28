@@ -124,7 +124,8 @@ The helper is configured using command line arguments only.
 .. code-block::
 
    usage: smart_exporter_helper [-h] [--socket-path SOCKET_PATH]
-                                [--timeout TIMEOUT] [-v]
+                                [--smartctl-arg SMARTCTL_ARG] [--timeout TIMEOUT]
+                                [-v]
 
    optional arguments:
      -h, --help            show this help message and exit
@@ -132,15 +133,22 @@ The helper is configured using command line arguments only.
                            Path at which the unix socket will be created.
                            Required if the process is not started via systemd
                            socket activation.
+     --smartctl-arg SMARTCTL_ARG
+                           Pass an additional argument to the smartctl command.
+                           Can be specified multiple times.
      --timeout TIMEOUT     Time in seconds to wait between connections. Defaults
                            to infinity.
      -v
+
 
 ``--timeout``
   specifies the time for which the service stays alive after finishing the last request. This can be used to help conserve memory at the cost of measurement latency and CPU/disk-IO.
 
 ``--socket-path``
   If systemd socket activation is not used, this argument must be given to specify at which location the socket shall be created. If a socket is already present at that location, it is unlinked at startup and replaced with a fresh socket. In general, it is recommended to use systemd with socket activation instead.
+
+``--smartctl-arg``
+  By default, the service uses the ``smartctl -iA`` command to get S.M.A.R.T. data for a specific device. Additional arguments can be provided to the command to customize the behavior of ``smartctl``. For example, ``--smartctl-arg=--nocheck=standby`` can be used to ensure that drives that are in standby mode are not woken up.
 
 HTTP Exporter
 -------------

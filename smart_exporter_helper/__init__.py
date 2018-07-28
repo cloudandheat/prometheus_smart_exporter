@@ -66,10 +66,10 @@ ATTR_LINE = re.compile(
 )
 
 
-def read_drive_info(device):
+def read_drive_info(device, additional_smartctl_args):
     try:
         data = subprocess.check_output(
-            ["smartctl", "-iA", device],
+            ["smartctl", "-iA"] + additional_smartctl_args + [device],
         ).decode()
     except subprocess.CalledProcessError as exc:
         logger.error(
@@ -132,14 +132,15 @@ def iter_drives():
                     yield basename, blockdev.parts[-1]
 
 
-def handle_client(sock):
+def handle_client(sock, additional_smartctl_args):
     try:
         # we never want to read
         sock.shutdown(socket.SHUT_RD)
 
         drives = []
         for port, device in iter_drives():
-            info = read_drive_info("/dev/"+device)
+            info = read_drive_info("/dev/"+device,
+                    additional_smartctl_args)
             info["port"] = port
             drives.append(info)
 
@@ -162,6 +163,14 @@ def main():
         default=None,
         help="Path at which the unix socket will be created. Required if the "
         "process is not started via systemd socket activation."
+    )
+
+    parser.add_argument(
+        "--smartctl-arg",
+        default=[],
+        action="append",
+        help="Pass an additional argument to the smartctl command. Can be "
+        "specified multiple times."
     )
 
     parser.add_argument(
@@ -246,6 +255,6 @@ def main():
 
         try:
             with contextlib.closing(client_sock):
-                handle_client(client_sock)
+                handle_client(client_sock, args.smartctl_arg)
         except Exception as exc:
             logger.exception("while handling client")
