@@ -233,7 +233,7 @@ def main():
             0
         )
         sock.bind(args.socket_path)
-        sock.listen()
+        sock.listen(16)
 
         if args.timeout is not None:
             sock.settimeout(args.timeout)
