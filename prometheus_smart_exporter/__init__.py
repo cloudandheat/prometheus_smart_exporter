@@ -221,6 +221,8 @@ class SMARTCollector(object):
                 metric = get_attr_metric(device, id_, name)
                 if metric is None:
                     continue
+                if attrinfo[type_] is None:
+                    continue
 
                 self.logger.debug(
                     "registering %s of #%d on metric %s",
