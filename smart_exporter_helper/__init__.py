@@ -108,7 +108,7 @@ def read_drive_info(device, additional_smartctl_args):
                 "Name": fields[1],
                 "Value": int(fields[3]),
                 "Worst": int(fields[4]),
-                "Thresh": int(fields[5]),
+                "Thresh": int(fields[5]) if fields[5].isdigit() else None,
                 "Raw": int(fields[9]) if fields[9].isdigit() else None,
             }
         )
