@@ -57,6 +57,35 @@ Install via PyPI:
 Installation via PyPI does *not* install any system-wide configuration. You need to do that yourself.
 
 
+Load the S.M.A.R.T. from `_check_smartdb.json`_:
+
+  $ sudo install -d -v /etc/prometheus_smart_exporter/
+  $ sudo curl -o /etc/prometheus_smart_exporter/devices.json `_check_smartdb.json`_
+
+
+Fixing 'device XXXX is missing in devicedb':
+
+Search for you device name in the devices.json file and add your device id in the Device list.
+Here is an example for "Intel 320" with "XXXX" added at the end of the list.
+
+  "Intel 320" : {
+    "Device" : ["Intel 320 Series SSDs","INTEL SSDSA2CW160G3","INTEL SSDSA2CT040G3","XXXX"],
+    "ID#" : {
+      "5" : "RAW_VALUE", # Re-allocated Sector Count
+      "9" : "RAW_VALUE", # Power-On Hours Count
+      ....
+      "242" : "RAW_VALUE", # Total LBAs Read (32MiB)
+      "1024" : "VALUE" # ATA error count (custom)
+    },
+    "Threshs" : {
+      "5" : ["20","40"],
+      ....
+      "1024" : ["0","10"]
+    },
+    "Perfs" : ["233","241","242"]
+  },
+
+
 Configuration
 =============
 
@@ -199,4 +228,5 @@ The HTTP exporter is configured using the aforementioned JSON files and command 
 
 
 .. _check_smart_attributes: https://github.com/thomas-krenn/check_smart_attributes
+.. _check_smartdb.json: https://raw.githubusercontent.com/thomas-krenn/check_smart_attributes/master/check_smartdb.json
 .. _git repository: https://github.com/cloudandheat/prometheus_smart_exporter
