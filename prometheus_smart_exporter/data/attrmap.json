@@ -75,13 +75,13 @@
             "id": 241,
             "match": "Total_LBAs_Written",
             "name": "written_lbas_total",
-            "type": "counter",
+            "type": "counter"
         },
         {
             "id": 242,
             "match": "Total_LBAs_Read",
             "name": "read_lbas_total",
-            "type": "counter",
+            "type": "counter"
         }
     ]
 }
