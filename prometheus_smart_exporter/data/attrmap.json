@@ -63,6 +63,7 @@
         },
         {
             "id": 230,
+            "match": "^.+life.+$",
             "name": "drive_life_protection_status",
             "type": "gauge"
         },
