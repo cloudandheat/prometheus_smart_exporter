@@ -57,16 +57,18 @@ Install via PyPI:
 Installation via PyPI does *not* install any system-wide configuration. You need to do that yourself.
 
 
-Load the S.M.A.R.T. from `_check_smartdb.json`_:
+Load the S.M.A.R.T. from `check_smartdb.json`::
 
   $ sudo install -d -v /etc/prometheus_smart_exporter/
-  $ sudo curl -o /etc/prometheus_smart_exporter/devices.json `_check_smartdb.json`_
+  $ sudo curl -o /etc/prometheus_smart_exporter/devices.json https://raw.githubusercontent.com/thomas-krenn/check_smart_attributes/master/check_smartdb.json
 
 
 Fixing 'device XXXX is missing in devicedb':
 
 Search for you device name in the devices.json file and add your device id in the Device list.
 Here is an example for "Intel 320" with "XXXX" added at the end of the list.
+
+::
 
   "Intel 320" : {
     "Device" : ["Intel 320 Series SSDs","INTEL SSDSA2CW160G3","INTEL SSDSA2CT040G3","XXXX"],
