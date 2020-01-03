@@ -2,7 +2,7 @@
     "generic": [
         {
             "id": 5,
-            "name": "reallocated_sectors",
+            "name": "reallocated_sectors_total",
             "type": "counter"
         },
         {
