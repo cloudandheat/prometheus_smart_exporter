@@ -39,7 +39,7 @@ class DeviceDB:
                 int(id_): {
                     "RAW_VALUE": "Raw",
                     "VALUE": "Value",
-                }[type_]
+                }[type_['value']]
                 for id_, type_ in device_info["ID#"].items()
             }
             threshs = {
