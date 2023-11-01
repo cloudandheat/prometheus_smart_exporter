@@ -43,7 +43,7 @@ DEVICE_PATH_PATTERN = re.compile(
 )
 
 SERIAL_NUMBER = re.compile(
-    r"^Serial Number:\s*(\S+)$",
+    r"^Serial [Nn]umber:\s*(\S+)$",
     re.MULTILINE,
 )
 
